@@ -23,12 +23,12 @@ extern bool modif;
 int ajouter_un_contact_dans_rep(Repertoire* rep, Enregistrement enr)
 {
 #ifdef IMPL_TAB
-	// compléter code ici pour tableau
+	
 	if (rep->nb_elts < MAX_ENREG)
 	{
 		modif = true;
 		rep->tab[rep->nb_elts] = enr;    //si la condition est vérifiée on ajoute le contact à la fin du tableau
-		rep->nb_elts++;   //on augmente le nombre de valeur
+		rep->nb_elts++;					//on augmente le nombre de valeur
 		return (OK);
 	}
 	else {
@@ -51,11 +51,12 @@ int ajouter_un_contact_dans_rep(Repertoire* rep, Enregistrement enr)
 
 	}
 	else {
-		//
-		// compléter code ici pour Liste
-		//
-		//
-		//
+		if (InsertElementAt(rep->liste, rep->liste->size, enr) != 0) {
+			rep->nb_elts++;     //on ajoute l'élement en queue
+			modif = true;
+			rep->est_trie = false;
+			return(OK);
+		}
 
 	}
 
@@ -75,7 +76,6 @@ int ajouter_un_contact_dans_rep(Repertoire* rep, Enregistrement enr)
 #ifdef IMPL_TAB
 void supprimer_un_contact_dans_rep(Repertoire* rep, int indice) {
 
-	// compléter code ici pour tableau
 	if (rep->nb_elts >= 1)		/* s'il y a au moins un element dans le tableau */
 	{						/* et que l'indice pointe à l'interieur */
 		for (int i = indice; i < rep->nb_elts - 1; i++) {   //on décale tout le tableau sur la gauche à partir de l'indice jusque nb_elts-1
@@ -116,11 +116,11 @@ int supprimer_un_contact_dans_rep_liste(Repertoire* rep, SingleLinkedListElem* e
 /**********************************************************************/
 void affichage_enreg(Enregistrement enr)
 {
-	// code à compléter ici
 	printf("\n %s, %s, %s\n", enr.nom, enr.prenom, enr.tel);
 	return;
 
 } /* fin affichage_enreg */
+
   /**********************************************************************/
   /*  fonction d'affichage d'un enregistrement avec alignement des mots */
   /* pour les listes                                                    */
@@ -128,7 +128,6 @@ void affichage_enreg(Enregistrement enr)
   /**********************************************************************/
 void affichage_enreg_frmt(Enregistrement enr)
 {
-	// code à compléter ici
 	// comme fonction affichage_enreg, mais avec présentation alignées des infos
 
 	printf("| %s", enr.nom);
@@ -149,8 +148,7 @@ void affichage_enreg_frmt(Enregistrement enr)
   /**********************************************************************/
 bool est_sup(Enregistrement enr1, Enregistrement enr2)
 {
-	// code à compléter ici
-	// code à compléter ici
+	
 	char tmp1[MAX_NOM];                                             //on copie les noms et les prenoms dans des variables temporaires et on les passe en majuscules
 	strncpy_s(tmp1, _countof(tmp1), enr2.nom, _TRUNCATE);
 	_strupr_s(tmp1, strlen(tmp1) + 1);
@@ -183,7 +181,7 @@ void trier(Repertoire* rep)
 {
 
 #ifdef IMPL_TAB
-	// ajouter code ici pour tableau
+	
 	for (int j = 0; j < rep->nb_elts; j++) {
 		for (int i = 0; i < rep->nb_elts - 1 - j; i++) {
 			// si enr1 > enr2, echange des enr
@@ -231,7 +229,7 @@ int rechercher_nom(Repertoire* rep, char nom[], int ind)
 
 
 #ifdef IMPL_TAB
-	// ajouter code ici pour tableau
+
 	ind_fin = rep->nb_elts;
 	strncpy_s(tmp_nom, _countof(tmp_nom), nom, _TRUNCATE);    //on copie nom dans tmp_nom, et on le passe en majuscule
 	_strupr_s(tmp_nom, strlen(tmp_nom) + 1);
@@ -244,7 +242,16 @@ int rechercher_nom(Repertoire* rep, char nom[], int ind)
 	}
 #else
 #ifdef IMPL_LIST
-	// ajouter code ici pour Liste
+	ind_fin = rep->nb_elts;
+	strncpy_s(tmp_nom, _countof(tmp_nom), nom, _TRUNCATE);    //on copie nom dans tmp_nom, et on le passe en majuscule
+	_strupr_s(tmp_nom, strlen(tmp_nom) + 1);
+	while (trouve == false && i < ind_fin) {  //on va comparer a chaque nom du répertoire jusqu'au dernier
+
+		strncpy_s(tmp_nom2, _countof(tmp_nom2), GetElementAt(rep->liste, i)->pers.nom, _TRUNCATE);   //on copie dans tmp_nom2 le nom du répertoire et on le passe en majuscule
+		_strupr_s(tmp_nom2, strlen(tmp_nom2) + 1);
+		if (strcmp(tmp_nom, tmp_nom2) == 0) trouve = true; //comparaison de la chaine de caractere on return true si c'est le même
+		else i++;  //sinon on passe au suivant
+	}
 
 #endif
 #endif
@@ -257,7 +264,6 @@ int rechercher_nom(Repertoire* rep, char nom[], int ind)
   /*********************************************************************/
 void compact(char* s)
 {
-	// compléter code ici
 
 	int j = 0;
 	int taille = strlen(s);
@@ -302,7 +308,19 @@ int sauvegarder(Repertoire* rep, char nom_fichier[])
 	}
 #else
 #ifdef IMPL_LIST
-	// ajouter code ici pour Liste
+	if (fopen_s(&fic_rep, nom_fichier, "w") != 0 || fic_rep == NULL) {   //on vérifie que le fichier est ouvert
+		err = ERROR;
+		return err;
+	}
+	for (int i = 0; i < rep->nb_elts; i++) {      //pour tous les éléments du tableau
+		fprintf(fic_rep, "%s%c", GetElementAt(rep->liste, i)->pers.nom, SEPARATEUR);           //on écrit dans le fichier les informations du contact
+		fprintf(fic_rep, "%s%c", GetElementAt(rep->liste, i)->pers.prenom, SEPARATEUR);
+		fprintf(fic_rep, "%s\n", GetElementAt(rep->liste, i)->pers.tel);
+
+	}
+	if (feof(fic_rep)) {
+		fclose(fic_rep);
+	}
 #endif
 #endif
 
@@ -358,7 +376,19 @@ int charger(Repertoire* rep, char nom_fichier[])
 				}
 #else
 #ifdef IMPL_LIST
-														// ajouter code implemention liste
+				Enregistrement nouveau;
+				if (lire_champ_suivant(buffer, &idx, nouveau.nom, MAX_NOM, SEPARATEUR) == OK)
+				{
+					idx++;							/* on saute le separateur */
+					if (lire_champ_suivant(buffer, &idx, nouveau.prenom, MAX_NOM, SEPARATEUR) == OK)
+					{
+						idx++;
+						if (lire_champ_suivant(buffer, &idx, nouveau.tel, MAX_TEL, SEPARATEUR) == OK)
+							num_rec++;		/* element à priori correct, on le comptabilise */
+					}
+				}
+				InsertElementAt(rep->liste, num_rec, nouveau);
+			
 #endif
 #endif
 

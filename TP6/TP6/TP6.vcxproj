@@ -28,6 +28,9 @@
     <ClCompile Include="..\..\outil.c" />
     <ClCompile Include="..\..\rep.c" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="rep.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

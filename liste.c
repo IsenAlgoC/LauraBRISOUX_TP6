@@ -79,12 +79,11 @@ int InsertElementAt(LinkedList *Liste, int i, Enregistrement pers) {
 		if (Liste->size == 0) { // insertion en tête de l'unique élément
 			NewElement = NewLinkedListElement(pers);
 			if (NewElement != NULL) {
-			//
-			//
-			//   insertion code ici
-			//
-			//
-			//
+				Liste->head = NewElement;
+				Liste->tail = NewElement;
+				NewElement->next = NULL;
+				Liste->size = 1;
+				return 1;
 		}
 			else {
 				return(0);
@@ -93,12 +92,11 @@ int InsertElementAt(LinkedList *Liste, int i, Enregistrement pers) {
 		if (Liste->size <= i) { // insertion en queue
 			NewElement = NewLinkedListElement(pers);
 			if (NewElement != NULL) {
-			//
-			//
-			//   insertion code ici
-			//
-			//
-			//
+				Liste->tail->next = NewElement;
+				Liste->tail = NewElement;
+				NewElement->next = NULL;
+				Liste->size += 1;
+				return 1;
 			}
 			else {
 				return(0);
@@ -118,11 +116,46 @@ int DeleteLinkedListElem(LinkedList * list, SingleLinkedListElem * item) {
 	if ((list->head == list->tail) && (list->size != 1)) return(0); // anomalie
 	if ((list->size == 0) || (item == NULL)) return(0); // pas d'élément dans la liste ou item invalide
 
-	//
-	//
-	// compléter code ici
-	//
-	//
+	// initialisation d'un pointeur sur l'élément courant
+	SingleLinkedListElem * tmp= list->head;
+	// previousdésigne l'élément qui précède l'élément courant
+	SingleLinkedListElem * previous= NULL;
+
+	// l'élément est en tête et en queue, il y a donc 1 seul élément dans la liste
+	if((item== list->head) && (item== list->tail)) {
+		list->head= NULL;
+		list->tail= NULL;
+		list->size = 0;
+		free(item);
+		return(1);
+	}
+	// il est en tête, on supprime la tête
+	if(item== list->head)  {
+		list->head= item->next;
+		list->size--;
+		free(item);
+		return(1);
+	}
+	// Recherche du maillon dans le reste de la liste chaînée
+	while((tmp!= NULL) && (tmp!= item)) {
+		previous= tmp;
+		tmp= tmp->next;
+	}
+	// s'il est en queue, on supprime la queue
+	if((previous != NULL) && (tmp== item) && (tmp->next==NULL)) {
+		list->tail= previous;
+		previous->next= NULL;
+		list->size--;
+		free(item);
+		return(1);
+	}
+	// s'il est au milieu, on supprime l'élément
+	if((previous !=NULL) && (tmp== item) && (tmp->next!=NULL)) {
+		previous->next= item->next;
+		list->size--;
+		free(item);
+		return(1);
+	}
 
 
 	return(0);  // pas trouvé
